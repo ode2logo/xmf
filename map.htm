@@ -2,7 +2,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <meta charset="UTF-8">
-<meta name="description" content="Xplorer Movil Fest 2016: mapa interactivo para recorrer virtual y físicamente este fascinante evento.">
+<meta name="description" content="Movil Fest 2016 Xplorer: mapa interactivo para recorrer virtual y físicamente este fascinante evento.">
 <meta name="keywords" content="Movil Fest,Movil,Fest,Misiones,Posadas,Argentina,Tecnologia,Juegos,Anime,Robots,Videojuegos,Celulares,Tablets,Expo,Exposiciones">
 <meta name="author" content="Emiliano Pujol">
 <script src="jquery.js"></script>
@@ -14,7 +14,7 @@
 <!--<LINK rel="StyleSheet" href="style.css?ra=1" type="text/css">
 <LINK rel="StyleSheet" href="jquery.alerts.css" type="text/css">
 <LINK rel="StyleSheet" href="jquery.ui.css" type="text/css">-->
-<title>Xplorer Movil Fest</title>
+<title>Movil Fest Xplorer</title>
 <script>
 //var $=window.parent.$.bind(window);
 var introanimar=false;
@@ -30,36 +30,57 @@ var radius;
 var avatar;
 var error;
 var canvas;
-var pokeball;
-var listaPokes;
-var tpks=false;
+var opciones;
+var menuOpciones;
+var opcionesInner;
+var tgop=false;
+var M, N, H, W;
+var lastPos;
+
+function ret_sty(el,tg) {
+    var ret;
+    if (!tg) {
+        if (el) ret={width:N*0.25,height:N*0.40,bottom:0,top:'auto',left:((W-N*0.2)/2)};
+        else ret={width:N*1.1,bottom:-N*0.4,left:-N*0.325,backgroundImage:'none'};
+    } else {
+        if (el) ret={width:W,height:H,bottom:0,top:'auto',left:0};
+        else ret={width:N*0.4,bottom:0,left:(W-N*0.4)/2,backgroundImage:'url(button.png)'};
+    }
+    return ret;
+}
+
 
 //$(window).load(function ()
+$(window).resize(function() {
+    W_resize();
+});
 $(document).ready(function () {
     radius=$("#radius");
     avatar=$("#avatar");
     error=$("#error");
     canvas=$("#canvas");
-    pokeball=$("#pokeball");
-    listaPokes=$("#listaPokes");
+    opciones=$("#opciones");
+    menuOpciones=$("#menuOpciones");
+    opcionesInner=$("#opcionesInner");
     showError("Buscando señal GPS...");
     if (navigator.geolocation) {
         //if (!navigator.geolocation.watchPosition)
             //navigator.geolocation.getCurrentPosition(showPosition,function(v){showError("No se pudo obtener la ubicación GPS"+v.message)},{enableHighAccuracy:true});
         //else
-            navigator.geolocation.watchPosition(showPosition,function(v){showError("No se pudo obtener la ubicación GPS")},{enableHighAccuracy:false});//*/
+            navigator.geolocation.watchPosition(showPosition,function(v){showError("No se pudo obtener la ubicación GPS")},{enableHighAccuracy:true});//*/
     } else
         showError("Disculpe, su navegador no soporta Geolocalización");
 
     setInterval(loop,500);
     W_resize();
-    inicializarMapa([-27.3831774,-55.8865714]);
+    //inicializarMapa([-27.3831774,-55.8865714]);
     canvas.on("click",click);
-    pokeball.on("click",togglePokes);
+    opciones.on("click",toggleOpciones);
     document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
 });
 
 function showPosition(pos) {
+    lastPos=pos;
     if (!map)
         inicializarMapa([pos.coords.latitude,pos.coords.longitude]);
     else {
@@ -97,10 +118,10 @@ function click(ev) {
     var selfPos=map.getCenter();
     arrPokes.sort(function(a,b){return getDist(selfPos,a.getPosition())-getDist(selfPos,b.getPosition());});
     if (getDist(selfPos,arrPokes[0].getPosition())>0.0003) {
-        showError("Muy lejos para capturarlo");
+        showError("Acércate a alguno de los puestos marcados en el mapa.");
     } else {
-        showError("Comienza una batalla...");
-        location.href="battle.html#"+arrPokes[0].ref;
+        /*showError("Comienza una batalla...");
+        location.href="battle.html#"+arrPokes[0].ref;*/
     }
 }
 
@@ -113,24 +134,23 @@ function getDist(p1,p2) {
     return (Math.sqrt(Math.pow(p1.lat()-p2.lat(),2)+Math.pow(p1.lng()-p2.lng(),2)))
 }
 
-function togglePokes() {
-    if (tpks) {
-        listaPokes.slideUp("slow");
+function toggleOpciones() {
+    //alert(1);
+    var stmo=ret_sty(1,!tgop);
+    var stop=ret_sty(0,!tgop);
+    if (!tgop) {
+        menuOpciones.animate(stmo,600);
+        opciones.css({backgroundImage:stop.backgroundImage})
+                .animate(stop,600);
+        opcionesInner.animate({opacity:1});
     } else {
-        var cum="<h3>Pokémon capturados:</h3>";
-        var lso=JSON.parse(localStorage.getItem("lso")||"[]");
-        //var lso=JSON.parse('[{"rf":25,"nm":"Pikachu"},{"rf":25,"nm":"Pikachu"},{"rf":55,"nm":"Pikachu"},{"rf":48,"nm":"Pikachu"},{"rf":25,"nm":"Pikachu"},{"rf":25,"nm":"Pikachu"}]');
-        lso.forEach(function (v,i) {
-            cum+="<div class='poke'>"
-                +"<u>"+v.nm+"</u>"
-                +"<img src='pokes_front/"+v.rf+".gif' width='100%'>"
-                +"</div>";
+        menuOpciones.animate(stmo,600);
+        opciones.animate(stop,600,null,function(){
+            $(this).css({backgroundImage:stop.backgroundImage});
         });
-        cum+="<div class='espacio'></div>";
-        listaPokes.html(cum);
-        listaPokes.slideDown("slow");
+        opcionesInner.animate({opacity:0});
     }
-    tpks=!tpks;
+    tgop=!tgop;
 }
 
 /******************************API GOOGLE MAPS**********************************/
@@ -141,7 +161,7 @@ function inicializarMapa(centrar) {
 	var latlng = new google.maps.LatLng(centrar[0],centrar[1]);
 	var tipo=google.maps.MapTypeId.SATELLITE;//HYBRID;//ROADMAP;//google.maps.MapTypeId.HYBRID
 	var settings = {
-		zoom: 18,
+		zoom: 20,
 		center: latlng,
         disableDefaultUI: true,
 		mapTypeControl: false,
@@ -250,15 +270,20 @@ function showError(txt) {
         .slideUp(500);
 }
 function W_resize() {
-    var w=window.screen.width;
-    var h=window.screen.height;
-    var M=minimo(w,h)*1/2*Math.PI;
+    W=window.screen.width;
+    H=window.screen.height;
+    M=minimo(W,H);
+    N=maximo(W,H);
     emap=document.getElementById('divmapa');
-    emap.style.width=M+'px';
-    emap.style.height=M+'px';
-    emap.style.left=((w-M)/2)+'px';
-    emap.style.top=((h-M)/2)+'px';
-    //inicializarMapa([-27.3831774,-55.8865714]);
+    emap.style.width=(M*1/2*Math.PI)+'px';
+    emap.style.height=(M*1/2*Math.PI)+'px';
+    emap.style.left=((W-M)/2)+'px';
+    emap.style.top=((H-M)/2)+'px';
+    if (lastPos)
+        inicializarMapa([lastPos.coords.latitude,lastPos.coords.longitude]);
+    menuOpciones.css(ret_sty(1,tgop));
+    opciones.css(ret_sty(0,tgop));
+    opcionesInner.css({opacity:(tgop?1:0)});
 }
 function minimo(n,m) {
     if (n<m) return m;
@@ -271,32 +296,30 @@ function maximo(n,m) {
 </script>
 <style>
 * {padding:0px;margin:0px}
-#divmapa {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;background-color:#08e;}
-#radius {width:100%;height:100%;position:absolute;z-index:5;top:0;left:0;
-        background-image:url(radius.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
-#avatar {width:100%;height:100%;position:absolute;z-index:10;top:0;left:0;
-        background-image:url(avatar_r.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
-#error {width:100%;color:#fff;position:absolute;z-index:15;top:0;left:0;display:none;
-        background-color:rgba(255,0,0,0.7);text-align:center;font-size:5vh;font-family:arial;padding:5vh 0;}
+#divmapawrap {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;background-color:#08e;overflow:hidden;}
+#divmapa {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;}
+#radius {width:100%;height:100%;position:absolute;z-index:5;top:0;left:0; background-image:url(radius.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
+#avatar {width:100%;height:100%;position:absolute;z-index:10;top:0;left:0; background-image:url(avatar_r.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
+#error {width:100%;color:#fff;position:absolute;z-index:15;top:0;left:0;display:none; background-color:rgba(255,0,0,0.7);text-align:center;font-size:5vh;font-family:arial;padding:5vh 0;}
 #canvas {width:100%;height:100%;position:absolute;z-index:20;top:0px;left:0px;}
-#pokeball {width:15%;height:auto;position:absolute;z-index:25;bottom:5%;left:43%;opacity:0.7;}
-#listaPokes {width:96%;height:96%;position:absolute;z-index:23;top:3%;left:3%;background-color:rgba(255,255,255,0.4);
-        display:none;overflow-x:hidden;overflow-y:auto;text-align:center;}
-#listaPokes h3 { font-family:arial;font-weight:bold;margin:3% 0 0 0; }
-#listaPokes .poke {width:25%;height:auto;padding:3%;margin:2% 1% 1% 0;border-radius:20%;text-shadow:0px 0px 2px #000, 0px 0px 2px #000, 0px 0px 2px #000;
-        background-color:rgba(230,255,255,0.4);display:inline-block;text-align:center;color:#fff;font-family:arial;}
-#listaPokes .espacio {height:15%;}
+#opciones {position:absolute;height:auto;background-size:100%;}
+#menuOpciones {overflow:hidden;z-index:23;position:absolute;}
+#opcionesInner {width:100%;height:100%;opacity:0;background-color:rgba(255,255,255,0.7);}
 </style>
 </head>
 <body>
 
-<div id='divmapa'></div>
+<div id='divmapawrap'>
+    <div id='divmapa'></div>
+</div>
 <div id='radius'></div>
 <div id='avatar'></div>
 <div id='error'></div>
 <canvas id='canvas'></canvas>
-<img id='pokeball' src='pokeball.png'/>
-<div id='listaPokes'></div>
+<div id='menuOpciones'>
+    <div id='opcionesInner'></div>
+    <img id='opciones' src='button_o.png'/>
+</div>
 
 </body>
 </html>
