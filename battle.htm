@@ -7,10 +7,12 @@
 <meta name="author" content="Emiliano Pujol">
 <!--<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>-->
 <script src="jquery.js"></script>
+<script src="buzz.min.js"></script>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width, height=device-height">
 <link rel="shortcut icon" href="favicon.png">
 <link rel="icon" href="favicon.png">
 <link rel="favicon" href="favicon.png">
+<LINK rel="StyleSheet" href="fonts.css" type="text/css">
 <!--<LINK rel="StyleSheet" href="style.css?ra=1" type="text/css">
 <LINK rel="StyleSheet" href="jquery.alerts.css" type="text/css">
 <LINK rel="StyleSheet" href="jquery.ui.css" type="text/css">-->
@@ -43,8 +45,8 @@ var vihe;
 var pow=26;
 var powC=2;
 
-//$(window).load(function ()
-$(document).ready(function () {
+$(window).load(function () {
+//$(document).ready(function () {
     si=setInterval(checkBall,25);
     video=$("#video");
     viwi=parseInt(video.css('width'));
@@ -53,25 +55,49 @@ $(document).ready(function () {
     pokemon=$("#pokemon");
     pokimg=$("#pokimg");
     camara=$("#camara");
+    hojas=$("#hojas");
     potencia=$("#potencia");
     flash=$("#flash");
     piwi=camara[0].width;
     pihe=camara[0].height;
     drine=[];
 
+    for (var h=0;h<12;h++) {
+        hojas.append("<img class='hoja' src='plantas/02b.png' style='left:"+rand(0,50)+"%;top:"+rand(0,50)+"%;transform:rotate("+rand(0,359)+"deg);-webkit-transform:rotate("+rand(0,359)+"deg);'>");
+    }
+    setTimeout(function(){
+        hojas.find(".hoja").each(function (i,v){
+            var ra=rand(0,359);
+            var tt=vihe/2+vihe*3*Math.cos(ra);
+            var tl=viwi/2+viwi*3*Math.sin(ra);
+            $(v).animate({top:tt,left:tl},7000);
+        });
+        hojas.fadeOut(4000);
+    },1500);//*/
+    //hojas.hide();
+
     video.css({backgroundImage:'url(bgbat.png)',backgroundSize:'cover'});
     //pokimg.on("click",function () {alert("El Pokémon ha escapado.");window.history.back()});
     fustart=function(){if(stateball<=2)relocatePokemon(rand(-100,100),rand(-50,50),rand(5,15))};
     pokimg.on("load",function () {pokimg.css({top:'110%',left:rand(0,70)+'%'});fustart();});
-    pokimg.attr('src','front/'+location.hash.substr(1)+'.png');
+    pokimg.attr('src','fronts/'+location.hash.substr(1)+'.png');
+    if (location.hash.substr(1)=='10000') {
+        localStorage.setItem("logros",localStorage.getItem("logros")+"T");
+    } else if (location.hash.substr(1)=='23451') {
+        localStorage.setItem("logros",localStorage.getItem("logros")+"C");
+    } else if (location.hash.substr(1)=='34345') {
+        localStorage.setItem("logros",localStorage.getItem("logros")+"U");
+    } else if (location.hash.substr(1)=='15161') {
+        localStorage.setItem("logros",localStorage.getItem("logros")+"Y");
+    }
     setInterval(fustart,15000);
     document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
     $("*").on("contextmenu",function(ev){ev.preventDefault();ev.stopPropagation();});
-    camara[0].ontouchstart=function (ev) {
+    pokemon[0].ontouchstart=function (ev) {
     	if (stateball==0) {
     		stateball=1;
     	}
-        pow=0;
+        //pow=0;
         ev.preventDefault();
         ev.stopPropagation();
     }
@@ -116,10 +142,11 @@ $(document).ready(function () {
             xball=parseInt(camara.css('left'))+parseInt(camara.css('width'))/2;
             yball=parseInt(camara.css('top'))+parseInt(camara.css('height'))/2;
             zball=2;
+            playSound("sounds/shutter");
             camara.animate({top:vihe},300);
             flash.parent().css({display:'block',backgroundColor:"rgba(255,255,255,1)",borderSpacing:100});
             flash.parent().animate({borderSpacing:0},{
-                delay:500,
+                duration:500,
                 step:function (now,tw) { $(this).css({backgroundColor:"rgba(255,255,255,"+(parseInt(now/10)/10)+")"}); }
             });//*/
             console.log(draft,bang,bspd,xball,yball);
@@ -135,6 +162,15 @@ $(document).ready(function () {
     /*activarRA();
     alert("yei");*/
 });
+
+function playSound(url) {
+    var sound;
+    $(function() {
+        sound = new buzz.sound( url, {
+            formats: ['ogg', 'mp3']
+        }).setVolume(100).play();
+    });
+}
 
 function activarRA() {
     navigator.getMedia = ( navigator.getUserMedia ||
@@ -164,7 +200,8 @@ function activarRA() {
 
 function checkBall() {
     if (stateball==1) {
-        if (pow==100||pow==0) powC=-powC;
+        if (pow==100||pow==0)
+            powC=-powC;
         pow+=powC;
         potencia.css({height:pow+'%'});
     } else if (stateball==2) {
@@ -199,6 +236,8 @@ function checkBall() {
                 showError("Buena fotografia!");
                 error.css({backgroundColor:'rgba(0,240,80,0.7)'});
                 stateball=9;
+                /********************************/
+                takePhoto();
             }
         }
     } else if (stateball==8) {
@@ -209,6 +248,41 @@ function checkBall() {
         setTimeout(restartcamara,1000);
         stateball=10;
     }
+}
+
+function takePhoto() {
+    var flasher=[parseInt(flash.css('left')),parseInt(flash.css('top')),parseInt(flash.css('width')),parseInt(flash.css('height'))];
+    //var flasher=[100,100,100,100];
+    var snapshot=document.createElement("canvas");
+    var ctx=snapshot.getContext("2d");
+    snapshot.width=viwi;
+    snapshot.height=vihe;
+    var snapfinal=document.createElement("canvas");
+    var ctxf=snapfinal.getContext("2d");
+    snapfinal.width=flasher[2];
+    snapfinal.height=flasher[3];
+    var nbg=new Image(); nbg.src="bgbat.png";
+    nbg.onload=function() {
+        ctx.drawImage(nbg,0,0,nbg.width,nbg.height,0,0,viwi,vihe);
+        var npk=new Image(); npk.src=pokimg[0].src;
+        npk.onload=function () {
+            var poker=[parseInt(pokimg.css('left')),parseInt(pokimg.css('top')),parseInt(pokimg.css('width')),parseInt(pokimg.css('height'))];
+            ctx.drawImage(npk,0,0,npk.width,npk.height,poker[0],poker[1],poker[2],poker[3]);
+            ctxf.drawImage(snapshot,flasher[0],flasher[1],flasher[2],flasher[3],0,0,flasher[2],flasher[3]);
+            var resultado=$("body").append("<div id='resultado'><button class='descartar' onclick='savePhoto(false)'>Descartar</button> <button class='guardar' onclick='savePhoto(true);'>Guardar</button></div>");
+            resultado=$("#resultado").css({backgroundImage:"url("+snapfinal.toDataURL()+")",width:'30%',height:'30%',left:'33%',top:'98%'})
+                    .animate({width:'73%',height:'73%',left:'13%',top:'8%'},1000);
+        }
+    }
+}
+
+function savePhoto(save){
+    if (save) {
+        var ph=$("#resultado").css("background-image");
+        ph=ph.split("'").join("\"").split("\"")[1];
+        localStorage.setItem("fotos",localStorage.getItem("fotos")+"|"+ph);
+    }
+    $("#resultado").animate({top:vihe},1000,'swing',function(){$(this).remove()});
 }
 
 function restartcamara() {
@@ -277,11 +351,16 @@ function showError(txt) {
 #pokimg {position:absolute;top:-40%;left:40%;width:40%;z-index:11;}
 #camara {position:absolute;top:85%;left:37%;width:auto;height:15%;z-index:100}
 .dot {position:absolute;width:2px;height:2px;background:white;}
-#hojas {display:none;width:100%;height:100%;position:absolute;z-index:14;top:0px;left:0px;overflow:hidden;}
-#flashContainer { display:none;height:100%;width:100%;left:0;top:0;position:absolute;z-index:16;overflow:hidden;background-color:rgba(255,255,255,1);border-spacing:0px; }
-#flash { border:2px dashed #fff; position:absolute; z-index:16; }
+#hojas {background-color:rgba(0,120,40,1);background-image:url(plantas/101.png);background-size:100% 100%;width:100%;height:100%;position:absolute;z-index:14;top:0px;left:0px;overflow:hidden;}
+.hoja {width:50%;height:50%;position:absolute;}
+#flashContainer { display:none;height:100%;width:100%;left:0;top:0;position:absolute;z-index:14;overflow:hidden;background-color:rgba(255,255,255,1);border-spacing:0px; }
+#flash { border:2px dashed #fff; position:absolute; }
 #potenciaContainer { border:2px solid #fff;height:80%;width:5%;right:2%;top:8%;position:absolute;z-index:12; }
 #potencia {width:100%;height:26%;position:absolute;bottom:0;background-image:url(bgpower.png);background-size:cover;background-position:center bottom;}
+#volver {position:absolute;top:2%;left:2%;z-index: 13;}
+#resultado {position:absolute;z-index:14;background-size:100% 100%;border:10px solid #fff;box-shadow:0px 0px 5px #000,0px 0px 5px #000;}
+#resultado button.guardar {position:absolute;bottom:2%;right:2%;}
+#resultado button.descartar {position:absolute;bottom:2%;left:2%;}
 </style>
 </head>
 <body>
@@ -299,6 +378,9 @@ function showError(txt) {
 <div id='hojas'></div>
 <div id='flashContainer'>
     <div id='flash'></div>
+</div>
+<div id='volver'>
+    <button onclick='history.go(-1);'>Volver</button>
 </div>
 
 </body>

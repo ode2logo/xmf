@@ -2,50 +2,73 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 <meta charset="UTF-8">
-<meta name="description" content="Pokémon Dont GO: Welcome">
-<meta name="keywords" content="PokemonGo, pokemon, go, argentina, latinoamerica, misiones, misionero">
-<meta name="author" content="ode2logo | Emiliano Pujol">
-<!--<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>-->
+<meta name="description" content="Xplorer Movil Fest: Bienvenido">
+<meta name="keywords" content="Movil Fest 2016 Posadas">
+<meta name="author" content="Emiliano Pujol">
+<script src="jquery.js"></script>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
 <link rel="shortcut icon" href="favicon.png">
 <link rel="icon" href="favicon.png">
 <link rel="favicon" href="favicon.png">
-<!--<LINK rel="StyleSheet" href="style.css?ra=1" type="text/css">
-<LINK rel="StyleSheet" href="jquery.alerts.css" type="text/css">
+<LINK rel="StyleSheet" href="fonts.css" type="text/css">
+<!--<LINK rel="StyleSheet" href="jquery.alerts.css" type="text/css">
 <LINK rel="StyleSheet" href="jquery.ui.css" type="text/css">-->
-<title>Pokémon Dont Go</title>
+<title>Movil Fest Xplorer</title>
 <style>
 * {padding:0px;margin:0px}
 body {background-color:#222}
+h3 {font-weight:normal; font-size:150%; font-family: "baloo bhai"; color:#fff; text-shadow:0 1px 1px #000;}
 #divwelcome {
-    background-color:#dff;
-    background-image:url(https://lh5.ggpht.com/8PODwBXKk4L201m4IO1wifRDfbn4Q1JxNxOzj-5TXPJ85_S-vOqntLi7TsVyeFQM0w4=w300);
-    background-repeat:no-repeat;
-    background-size:30%;
+    background-color:#0a0;
+    background-image:url(bgwelcome.png);
+    background-repeat:repeat-y;
+    background-size:100%;
     background-position: right top;
     margin: auto;
     left:0;
     right:0;
     top:3%;
     position:absolute;
-    padding: 3%;
+    padding: 5%;
     width:80%;
-    font-family: fantasy, arial;
+    font-family: "Josefin Sans", fantasy, arial;
+    font-size: 1.5em;
+    color:#fff;
 }
 hr { margin:5%; }
 button { margin:5%; font-size:170%; padding: 1vh 3vh; }
 .screenshot { max-width: 100%; width:auto; }
+img.logo_footer {width:100%;max-width: 300px;}
+#txtuser {font-family: "lobster";font-size:1.5em;max-width:100%; text-align:center;padding:0.1em 0em; margin:1em 0 0 0; }
 </style>
 <script>
 document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
+var h=0;
+var dw;
+var it;
+$(document).ready(function () {
+    dw=$("#divwelcome");
+    it=$("#txtuser");
+    var us=localStorage.getItem("user")||"";
+    if (us=='undefined'||us=='null')
+        us='';
+    it.attr('value',us);
+    setInterval(function(){
+        h++;
+        dw.css({backgroundColor:"hsl("+h+",50%,50%)"});
+    },50);
+});
+function chgUser(el) {
+    localStorage.setItem("user",el.value);
+}
 </script>
 </head>
 <body>
 
 <div id='divwelcome'>
-    <h3>Bienvenido!</h3>
+    <h3>¡Bienvenido Explorador!</h3>
     <a name='top'></a>
-    <p>Antes de continuar, te sugerimos que utilices Mozilla Firefox y habilites GPS/Servicios de Ubicación.</p>
+    <p>Antes de continuar, te sugerimos que utilices <b>Mozilla Firefox</b> y habilites GPS/Servicios de Ubicación.</p>
     <p>Si no lo tienes, puedes descargarlo aquí:</p>
     <center>
     <a href='https://play.google.com/store/apps/details?id=org.mozilla.firefox&hl=es_419'>
@@ -55,31 +78,27 @@ document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
         <img src='appstore.png' height='36' alt='App Store'>
     </a>
     </center>
+    <p>También puedes utilizar <b>Google Chrome</b>, o tu navegador habitual. </p>
     <hr>
-    <h3>Recorre tu ciudad</h3>
-    <p>Hemos hecho algunos cambios desde la versión original. Ahora no tendrás que correr demasiado para alcanzar a los Pokémon.</p>
+    <h3>Recorre la Expo Movil Fest 2016</h3>
+    <p>Mientras juegas puedes explorar las distintas actividades de la Expo. ¡Cuidado! Hay animales sueltos.</p>
     <a href='screenshot_1.png'><img src='screenshot_1.png' class='screenshot'></a>
 
     <hr>
-    <h3>Capturado en 3, 2, 1...</h3>
-    <p>También hemos modificado (agregado mejor dicho), el sistema de captura. Antes el Pokémon siempre escapaba (que malo :P).</p>
+    <h3>Foto en 3, 2, 1...</h3>
+    <p>Encuentra especímenes virtuales de nuestra fauna, tómales fotos, ¡y compártelas!.</p>
     <a href='screenshot_2.png'><img src='screenshot_2.png' class='screenshot'></a>
 
     <hr>
-    <h3>Si estás preparado</h3>
-    Atrápalos si puedes. Pokémon don't go!
+    <h3>Si ya te ataste los cordones y activaste GPS:</h3>
+    ¡Empieza este desafío! No te olvides de participar en los sorteos.
     <center>
         <!--<button onclick="if(navigator.userAgent.indexOf('Firefox')>=0){location.href='map.htm'}else{alert('Por favor, ingresa a través de Mozilla Firefox, de otro modo no lo podrás disfrutar al 101%.');location.href='#top';};">Comenzar!</button>-->
-        <button onclick="if(navigator.userAgent.indexOf('Firefox')>=0||1==1){location.href='map.htm'}else{alert('Por favor, ingresa a través de Mozilla Firefox, de otro modo no lo podrás disfrutar al 101%.');location.href='#top';};">Comenzar!</button>
+        <input type='text' id='txtuser' onchange='chgUser(this)' onkeyup='chgUser(this)' placeholder="Ingresa tu nombre" maxlength='24'>
+        <button onclick="if(it.attr('value')!=''){location.href='map.htm'}else{alert('Por favor, ingresa tu nombre o apodo.');it.focus();};">Comenzar!</button>
     </center>
 
-    <hr>
-    <h3>Acerca de PDG</h3>
-    <p>Este proyecto no vá más allá de ser un entretenimiento ocasional, es posible que no vengan futuras mejoras.</p>
-    <p>No se guarda información personal ni se difunde, no obstante el usuario es responsable del uso que le quiera dar.</p>
-    <p>Desarrollado por Emiliano Pujol, <i>ode2logo</i>.</p>
-    <p>Contacto: <a href='mailto:enposadas@gmail.com'>enposadas@gmail.com</a> .</p>
-    <p>GitHub: <a href='https://github.com/ode2logo/pokemondontgo' target='_blank'>PokémonDontGO</a></p>
+    <center><img src='logo.png' class='logo_footer'></center>
 </div>
 
 </body>

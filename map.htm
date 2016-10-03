@@ -11,6 +11,7 @@
 <link rel="shortcut icon" href="favicon.png">
 <link rel="icon" href="favicon.png">
 <link rel="favicon" href="favicon.png">
+<LINK rel="StyleSheet" href="fonts.css" type="text/css">
 <!--<LINK rel="StyleSheet" href="style.css?ra=1" type="text/css">
 <LINK rel="StyleSheet" href="jquery.alerts.css" type="text/css">
 <LINK rel="StyleSheet" href="jquery.ui.css" type="text/css">-->
@@ -33,17 +34,20 @@ var canvas;
 var opciones;
 var menuOpciones;
 var opcionesInner;
+var info;
 var tgop=false;
 var M, N, H, W;
 var lastPos;
+var heading=0;
+var mustHeading=0;
 
 function ret_sty(el,tg) {
     var ret;
     if (!tg) {
-        if (el) ret={width:N*0.25,height:N*0.40,bottom:0,top:'auto',left:((W-N*0.2)/2)};
+        if (el) ret={width:N*0.25,height:N*0.40,bottom:0,top:'auto',left:((W-N*0.22)/2)};
         else ret={width:N*1.1,bottom:-N*0.4,left:-N*0.325,backgroundImage:'none'};
     } else {
-        if (el) ret={width:W,height:H,bottom:0,top:'auto',left:0};
+        if (el) ret={width:W,height:'100%',bottom:'auto',top:0,left:0};
         else ret={width:N*0.4,bottom:0,left:(W-N*0.4)/2,backgroundImage:'url(button.png)'};
     }
     return ret;
@@ -62,6 +66,7 @@ $(document).ready(function () {
     opciones=$("#opciones");
     menuOpciones=$("#menuOpciones");
     opcionesInner=$("#opcionesInner");
+    info=$("#info");
     showError("Buscando señal GPS...");
     if (navigator.geolocation) {
         //if (!navigator.geolocation.watchPosition)
@@ -88,12 +93,17 @@ function showPosition(pos) {
         map.setCenter(latlng);
     }
     //alert(pos.coords.heading);
-    emap.style.transform="rotate("+pos.coords.heading+"deg)";
-    emap.style.webkitTransform="rotate("+pos.coords.heading+"deg)";
-    emap.style.mozTransform="rotate("+pos.coords.heading+"deg)";
-    emap.style.msTransform="rotate("+pos.coords.heading+"deg)";
+    mustHeading=pos.coords.heading;
     //if (!navigator.geolocation.watchPosition)
     //navigator.geolocation.getCurrentPosition(showPosition,function(v){showError("No se pudo obtener la ubicación GPS")},{enableHighAccuracy:true,timeout:10000});
+}
+
+function rotateMapa(ang) {
+    ang=wrap360(-ang);
+    emap.style.transform="rotate("+ang+"deg)";
+    emap.style.webkitTransform="rotate("+ang+"deg)";
+    emap.style.mozTransform="rotate("+ang+"deg)";
+    emap.style.msTransform="rotate("+ang+"deg)";
 }
 
 function loop() {
@@ -104,10 +114,40 @@ function loop() {
     if (r<=2) {
         avatar.css({backgroundImage:"url("+(r==2?"avatar_r.png":"avatar_l.png")+")"});
     }
-    if (map&&step>10) {
-        checkPokes();
+    if (map) {
+        if (step>10)
+            checkPokes();
+        if (Math.abs(heading-mustHeading)>1) {
+            var da=difAng(heading,mustHeading)/5;
+            heading+=da;
+            rotateMapa(heading);
+        }
+        var cum="<u>Precisión:</u> "+parseInt(lastPos.coords.accuracy)+"m";
+        info.html(cum);
     }
     step++;
+}
+
+function difAng(a,b) {
+    a=wrap360(a);
+    b=wrap360(b);
+
+    var try1=b-a;
+    if (try1<0)
+        var try2=b-a+360;
+    else
+        var try2=b-a-360;
+
+    return (Math.abs(try1)<Math.abs(try2)?try1:try2);
+}
+
+function wrap360(a) {
+    if (a<0)
+        return wrap360(a+360);
+    else if (a>=360)
+        return wrap360(a-360);
+    else
+        return a;
 }
 
 function click(ev) {
@@ -118,10 +158,11 @@ function click(ev) {
     var selfPos=map.getCenter();
     arrPokes.sort(function(a,b){return getDist(selfPos,a.getPosition())-getDist(selfPos,b.getPosition());});
     if (getDist(selfPos,arrPokes[0].getPosition())>0.0003) {
-        showError("Acércate a alguno de los puestos marcados en el mapa.");
+        showError("¡Atención! Hay animales cerca. Búscalos. Están escondidos.");
     } else {
-        /*showError("Comienza una batalla...");
-        location.href="battle.html#"+arrPokes[0].ref;*/
+        showError("¡Aquí hay algo!");
+        error.css({backgroundColor:'rgba(0,240,80,0.8)'});
+        setTimeout(function(){location.href="battle.htm#"+arrPokes[0].ref},1000);
     }
 }
 
@@ -139,16 +180,35 @@ function toggleOpciones() {
     var stmo=ret_sty(1,!tgop);
     var stop=ret_sty(0,!tgop);
     if (!tgop) {
-        menuOpciones.animate(stmo,600);
+        menuOpciones.css({top:'auto'})
+                    .animate(stmo,600);
         opciones.css({backgroundImage:stop.backgroundImage})
                 .animate(stop,600);
-        opcionesInner.animate({opacity:1});
+        opcionesInner.animate({opacity:1},1000);
+        var cum="";
+        cum+="<div class='usuario'>"+localStorage.getItem("user")+"</div>";
+        cum+="<div class='tit'>Logros:</div>";
+        var logros=(localStorage.getItem("logros")+'');
+        cum+="<table class='logro"+(logros.indexOf('T')>=0?"":" pendiente")+"'><tr><td class='img'><img src='medallas/10000.png'></td><td class='desc'>"+(logros.indexOf('T')>=0?"Este ave no resulta ser muy simpática, pero tenemos que cuidarla porque está en peligro de extinción.":"<b>No tienes este logro</b>.<br>Encuentra un Tucán.")+"</td></tr></table>";
+        cum+="<table class='logro"+(logros.indexOf('C')>=0?"":" pendiente")+"'><tr><td class='img'><img src='medallas/23451.png'></td><td class='desc'>"+(logros.indexOf('C')>=0?"¡Coatíes por doquier! Aún así su habitat se reduce año tras año. Cuídalos.":"<b>No tienes este logro</b>.<br>Encuentra un Coatí.")+"</td></tr></table>";
+        cum+="<table class='logro"+(logros.indexOf('U')>=0?"":" pendiente")+"'><tr><td class='img'><img src='medallas/34345.png'></td><td class='desc'>"+(logros.indexOf('U')>=0?"Antes de que inventaran las pelotas, el fútbol se jugaba con estos animales. (Mentira). De todas formas se los ha cazado insdiscriminadamente. ¡No hagas lo mismo!":"<b>No tienes este logro</b>.<br>Encuentra un Tatú.")+"</td></tr></table>";
+        cum+="<table class='logro"+(logros.indexOf('Y')>=0?"":" pendiente")+"'><tr><td class='img'><img src='medallas/15161.png'></td><td class='desc'>"+(logros.indexOf('Y')>=0?"¡Hermoso! ¡Precioso! ¡Único! Quién diría que encontraríamos uno en el Movil Fest.":"<b>No tienes este logro</b>.<br>Encuentra un Yaguareté.")+"</td></tr></table>";
+        cum+="<table class='logro hr'><tr><td class='img'>&nbsp;</td><td class='desc'>&nbsp;</tr></table>";
+        cum+="<div class='tit'>Fotos:</div>";
+        var fots=(localStorage.getItem("fotos")+"").split("|");
+        for (var f=fots.length-1;f>=0;f--) {
+            if (fots[f].length>12)
+                cum+="<img class='foto' src='"+fots[f]+"' onclick='alert(this.src)'> ";
+        }
+        cum+="<br><br><br><br><br><br>";
+        opcionesInner.html(cum);
     } else {
-        menuOpciones.animate(stmo,600);
+        menuOpciones.css({top:'auto'})
+                    .animate(stmo,600);
         opciones.animate(stop,600,null,function(){
             $(this).css({backgroundImage:stop.backgroundImage});
         });
-        opcionesInner.animate({opacity:0});
+        opcionesInner.animate({opacity:0},1000);
     }
     tgop=!tgop;
 }
@@ -159,7 +219,9 @@ function inicializarMapa(centrar) {
 		return;
 	}
 	var latlng = new google.maps.LatLng(centrar[0],centrar[1]);
-	var tipo=google.maps.MapTypeId.SATELLITE;//HYBRID;//ROADMAP;//google.maps.MapTypeId.HYBRID
+    var tipo=google.maps.MapTypeId.HYBRID;
+    var tipo=google.maps.MapTypeId.ROADMAP;
+    var tipo=google.maps.MapTypeId.SATELLITE;
 	var settings = {
 		zoom: 20,
 		center: latlng,
@@ -172,46 +234,40 @@ function inicializarMapa(centrar) {
 	};
 
 	map = new google.maps.Map(document.getElementById("divmapa"), settings);
-    for (var v=0;v<=151;v++) {
-        if (v!=0) imgPokes[v] = new google.maps.MarkerImage("pokes/"+v+".gif",
-            new google.maps.Size(50,50),
-            new google.maps.Point(0,0),
-            new google.maps.Point(25,50)
-        ); else {
-            imgPasto = new google.maps.MarkerImage("pasto.png",
-                new google.maps.Size(50,50),
-                new google.maps.Point(0,0),
-                new google.maps.Point(25,50)
-            );
-        }
-    }
+    imgPasto = new google.maps.MarkerImage("pasto.png",
+        new google.maps.Size(50,50),
+        new google.maps.Point(0,0),
+        new google.maps.Point(25,50)
+    );
     step = 0;
 
     inicializarPokes(centrar);
 }
 function checkPokes() {
-    var selfPos=map.getCenter();
-    for (var i=rand(0,5);i<arrPokes.length;i+=rand(1,5)) {
-        var dist=getDist(selfPos,arrPokes[i].getPosition());
-        if (dist<0.0005) {
-            if (!arrPokes[i].descubierto) {
-                arrPokes[i].descubierto=true;
-                arrPokes[i].setIcon(arrPokes[i].iconb);
-            }
-            if (dist<0.0003)
-                arrPokes[i].setVisible(true);
-            runAway(arrPokes[i],selfPos);
-        } else if (dist>0.0030) {
-            arrPokes[i].setVisible(false);
-            nuevoPoke([selfPos.lat(),selfPos.lng()]);
-            arrPokes=arrPokes.filter(function(v){return v.pid!=arrPokes[i].pid});
-        } else {
-            if (rand(0,5)==1)
-                chaseHuman(arrPokes[i],selfPos);
-            else
-                arrPokes[i].setVisible(rand(0,30)==1);
+    if (rand(0,5)==1) {
+        var selfPos=map.getCenter();
+        var i=rand(0,arrPokes.length-1);
+        var pok=arrPokes[i];
+        for (var n=0;n<6;n++) {
+            setTimeout(function(){pok.shake()},80*n);
         }
     }
+}
+function shake() {
+    if (!this||!this.getPosition)
+        return false;
+    if (!this.ss)
+        this.ss=5;
+    if (!this.sm)
+        this.sm=0;
+    this.ss*=-1;
+    this.sm++;
+    var pos=this.getPosition();
+    pos.lat=pos.lat();
+    pos.lng=pos.lng();
+    if (parseInt(this.sm/6)%2==0) pos.lat+=this.ss/1000000;
+    if (parseInt(this.sm/6)%2==1) pos.lng+=this.ss/1000000;
+    this.setPosition(new google.maps.LatLng(pos.lat,pos.lng));
 }
 function isCerca(p1,p2) {
     if (getDist(p1,p2)<0.0005) {
@@ -247,8 +303,9 @@ function inicializarPokes(centrar) {
     }
 }
 function nuevoPoke(centrar) {
-    var ref = rand(1,151);
-    var pos = new google.maps.LatLng(centrar[0]+rand(-15,15)/10000,centrar[1]+rand(-15,15)/10000);
+    var ref = rand(0,4);
+    var ref = 10000;
+    var pos = new google.maps.LatLng(centrar[0]+rand(-10,10)/10000,centrar[1]+rand(-10,10)/10000);
     //var pos = new google.maps.LatLng(centrar[0]+0.0001,centrar[1]+0.0001);
     var poke = new google.maps.Marker({
           position: pos,
@@ -260,6 +317,7 @@ function nuevoPoke(centrar) {
           descubierto: false,
           iconb: imgPokes[ref]
     });
+    poke.shake=shake.bind(poke);
     arrPokes.push(poke);
     pids++;
 }
@@ -277,8 +335,8 @@ function W_resize() {
     emap=document.getElementById('divmapa');
     emap.style.width=(M*1/2*Math.PI)+'px';
     emap.style.height=(M*1/2*Math.PI)+'px';
-    emap.style.left=((W-M)/2)+'px';
-    emap.style.top=((H-M)/2)+'px';
+    emap.style.left=((W-M*1/2*Math.PI)/2)+'px';
+    emap.style.top=((H-M*1/2*Math.PI)/2)+'px';
     if (lastPos)
         inicializarMapa([lastPos.coords.latitude,lastPos.coords.longitude]);
     menuOpciones.css(ret_sty(1,tgop));
@@ -297,14 +355,24 @@ function maximo(n,m) {
 <style>
 * {padding:0px;margin:0px}
 #divmapawrap {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;background-color:#08e;overflow:hidden;}
-#divmapa {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;}
+#divmapa {width:100%;height:100%;position:absolute;z-index:1;top:0px;left:0px;-background-image:url(centrando.png);-background-size:100%;}
 #radius {width:100%;height:100%;position:absolute;z-index:5;top:0;left:0; background-image:url(radius.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
 #avatar {width:100%;height:100%;position:absolute;z-index:10;top:0;left:0; background-image:url(avatar_r.png);background-repeat:no-repeat;background-size:40%;background-position:center;}
 #error {width:100%;color:#fff;position:absolute;z-index:15;top:0;left:0;display:none; background-color:rgba(255,0,0,0.7);text-align:center;font-size:5vh;font-family:arial;padding:5vh 0;}
 #canvas {width:100%;height:100%;position:absolute;z-index:20;top:0px;left:0px;}
 #opciones {position:absolute;height:auto;background-size:100%;}
 #menuOpciones {overflow:hidden;z-index:23;position:absolute;}
-#opcionesInner {width:100%;height:100%;opacity:0;background-color:rgba(255,255,255,0.7);}
+#opcionesInner {width:100%;height:100%;opacity:0;background-color:rgba(255,255,255,0.8); overflow-y: auto;}
+#opcionesInner img.foto {padding:2%;border:1px solid #000;margin:2% 0 0 2%;width:24%;box-shadow:0px 0px 0.2em #000; }
+#opcionesInner div.tit {padding:1% 8%; text-decoration:underline; display:block; font-size:2.5em; font-family:"Lobster"}
+#info {position: absolute;bottom:2%; left: 2%; color:#fff; font-size:2.5vh; z-index: 2;text-shadow:0 1px 1px #000,0 1px 1px #000; font-family:tahoma;}
+table.logro { border-top:2px dashed #888; width:90%; margin:2% 5%;padding:1% 0; font-family: 'Indie Flower' }
+table.logro .img { width:25%; text-align:center; vertical-align:center; }
+table.logro .img img { width:50%; }
+table.logro.pendiente .img img {-webkit-filter: grayscale(100%); filter: grayscale(100%);}
+table.logro.pendiente { color:#888; }
+div.usuario {text-align:center;margin:5% 0 3% 0;font-size:3em;font-family:'Baloo Bhai';color:#fff;text-shadow:0 -2px 0px #000;background-color:hsl(100,50%,50%);box-shadow:0 2px 0px #000;}
+
 </style>
 </head>
 <body>
@@ -315,6 +383,7 @@ function maximo(n,m) {
 <div id='radius'></div>
 <div id='avatar'></div>
 <div id='error'></div>
+<div id='info'></div>
 <canvas id='canvas'></canvas>
 <div id='menuOpciones'>
     <div id='opcionesInner'></div>
