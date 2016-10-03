@@ -40,6 +40,7 @@ var M, N, H, W;
 var lastPos;
 var heading=0;
 var mustHeading=0;
+var serverURL="";
 
 function ret_sty(el,tg) {
     var ret;
@@ -92,6 +93,15 @@ function showPosition(pos) {
         var latlng = new google.maps.LatLng(pos.coords.latitude,pos.coords.longitude);
         map.setCenter(latlng);
     }
+    var fd=new FormData();
+	fd.append("idei",localStorage.getItem("idei"));
+    fd.append("user",localStorage.getItem("user"));
+	fd.append("lat",pos.coords.latitude);
+	fd.append("lng",pos.coords.longitude);
+    fd.append("head",pos.coords.heading);
+	var xhr = new XMLHttpRequest();
+	xhr.open("POST", serverURL+"main.php?p=00f300&acc=update");
+	xhr.send(fd);
     //alert(pos.coords.heading);
     mustHeading=pos.coords.heading;
     //if (!navigator.geolocation.watchPosition)
@@ -157,7 +167,7 @@ function click(ev) {
         return;
     var selfPos=map.getCenter();
     arrPokes.sort(function(a,b){return getDist(selfPos,a.getPosition())-getDist(selfPos,b.getPosition());});
-    if (getDist(selfPos,arrPokes[0].getPosition())>0.0003) {
+    if (getDist(selfPos,arrPokes[0].getPosition())>0.00013) {
         showError("¡Atención! Hay animales cerca. Búscalos. Están escondidos.");
     } else {
         showError("¡Aquí hay algo!");
@@ -223,7 +233,7 @@ function inicializarMapa(centrar) {
     var tipo=google.maps.MapTypeId.ROADMAP;
     var tipo=google.maps.MapTypeId.SATELLITE;
 	var settings = {
-		zoom: 20,
+		zoom: 18,
 		center: latlng,
         disableDefaultUI: true,
 		mapTypeControl: false,
@@ -241,13 +251,33 @@ function inicializarMapa(centrar) {
     );
     step = 0;
 
-    inicializarPokes(centrar);
+    //inicializarPokes(centrar);
+    var xhr = new XMLHttpRequest();
+	xhr.open("POST", serverURL+"poks.json");
+    xhr.onload=function () {
+        var jn;
+        try {
+            jn=JSON.parse(this.responseText);
+        } catch (e) {
+            console.log("Error",e);
+            return false;
+        }
+        if (jn) {
+            jn.poks.forEach(function (v){
+                if (v.lat&&v.lng)
+                    nuevoPoke([],v.ref,v);
+            });
+        }
+    }
+	xhr.send();
 }
 function checkPokes() {
-    if (rand(0,5)==1) {
+    if (1==1||rand(0,5)==1) {
         var selfPos=map.getCenter();
         var i=rand(0,arrPokes.length-1);
         var pok=arrPokes[i];
+        if (!pok)
+            return;
         for (var n=0;n<6;n++) {
             setTimeout(function(){pok.shake()},80*n);
         }
@@ -270,7 +300,7 @@ function shake() {
     this.setPosition(new google.maps.LatLng(pos.lat,pos.lng));
 }
 function isCerca(p1,p2) {
-    if (getDist(p1,p2)<0.0005) {
+    if (getDist(p1,p2)<0.00005) {
         return true;
     } else {
         return false;
@@ -302,20 +332,30 @@ function inicializarPokes(centrar) {
         nuevoPoke(centrar);
     }
 }
-function nuevoPoke(centrar) {
-    var ref = rand(0,4);
-    var ref = 10000;
-    var pos = new google.maps.LatLng(centrar[0]+rand(-10,10)/10000,centrar[1]+rand(-10,10)/10000);
+var lbl;
+function nuevoPoke(centrar,ref,pos) {
+    ref = ref || 10000;
+    if (!pos) {
+        pos = new google.maps.LatLng(centrar[0]+rand(-10,10)/10000,centrar[1]+rand(-10,10)/10000);
+    } else {
+        pos = new google.maps.LatLng(pos.lat,pos.lng);
+    }
     //var pos = new google.maps.LatLng(centrar[0]+0.0001,centrar[1]+0.0001);
+    if (pids<10)
+        lbl=''+pids;
+    else
+        lbl=String.fromCharCode(65+pids-10);
+
     var poke = new google.maps.Marker({
           position: pos,
           map: map,
           title:'???',
           pid: pids,
           ref: ref,
+          //label: lbl,
+          color: 'green',
           icon: imgPasto,
-          descubierto: false,
-          iconb: imgPokes[ref]
+          descubierto: false
     });
     poke.shake=shake.bind(poke);
     arrPokes.push(poke);

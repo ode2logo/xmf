@@ -279,7 +279,10 @@ function takePhoto() {
 function savePhoto(save){
     if (save) {
         var ph=$("#resultado").css("background-image");
-        ph=ph.split("'").join("\"").split("\"")[1];
+        //console.log(ph);
+        ph=ph.split("'").join("").split("\"").join("");
+        ph=ph.substr(4,ph.length-5);
+        //console.log(ph);
         localStorage.setItem("fotos",localStorage.getItem("fotos")+"|"+ph);
     }
     $("#resultado").animate({top:vihe},1000,'swing',function(){$(this).remove()});

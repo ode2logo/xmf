@@ -49,6 +49,11 @@ var it;
 $(document).ready(function () {
     dw=$("#divwelcome");
     it=$("#txtuser");
+    var id=localStorage.getItem("idei")||"";
+    if (id=='undefined'||id=='null') {
+        id=Math.round(Math.random()*100000000);
+        localStorage.setItem("idei",id);
+    }
     var us=localStorage.getItem("user")||"";
     if (us=='undefined'||us=='null')
         us='';
