@@ -45,6 +45,10 @@ var idei=localStorage.getItem("idei");
 var user=localStorage.getItem("user");
 var sexo=localStorage.getItem("sexo");
 var pts=parseInt(localStorage.getItem("puntos"));
+var lsv_pts=Math.random()+'';
+	localStorage.setItem("lsv_pts",lsv_pts);
+var ini_W;
+var ini_H;
 
 function ret_sty(el,tg) {
     var ret;
@@ -61,6 +65,14 @@ function ret_sty(el,tg) {
 
 //$(window).load(function ()
 $(window).resize(function() {
+	if (ini_W&&ini_H) {
+		if ((ini_W-window.screen.width)*(ini_H-window.screen.height)<0) {
+			setTimeout(function(){location.reload()},200);
+			return;
+		}
+	}
+	ini_W=window.screen.width;
+	ini_H=window.screen.height;
     W_resize();
 });
 $(document).ready(function () {
@@ -142,11 +154,15 @@ function loop() {
         info.html(cum);
     }
     step++;
-    if (step%2==1) {
-        pts=parseInt(localStorage.getItem("puntos"));
-        pts++;
-        console.log(pts);
-        localStorage.setItem("puntos",pts);
+    if (step%10==1) {
+		if (lsv_pts==localStorage.getItem("lsv_pts")) {		
+			pts=parseInt(localStorage.getItem("puntos"));
+			pts+=5;
+			console.log(pts);
+			localStorage.setItem("puntos",pts);
+		} else {
+			showError("Posiblemente has abierto 2 pestañas con el mismo juego... esta pestaña puedes cerrarla.");
+		}
     }
 }
 

@@ -46,9 +46,11 @@ var pow=26;
 var powC=2;
 var pts=parseInt(localStorage.getItem("puntos"));
 var logros=localStorage.getItem("logros")+'';
+var ini_W;
+var ini_H;
 
 $(window).load(function () {
-	playSound("sounds/jungle.mp3");
+	playSound("sounds/jungle");
 //$(document).ready(function () {
     si=setInterval(checkBall,25);
     video=$("#video");
@@ -328,9 +330,16 @@ function relocateFlash(x,y,z) {
     flash.css({top:ny,left:nx});
 }
 
-/*$(window).resize(function() {
-    //setTimeout(function(){location.reload()},200);
-});*/
+$(window).resize(function() {
+	if (ini_W&&ini_H) {
+		if ((ini_W-window.screen.width)*(ini_H-window.screen.height)<0) {
+			setTimeout(function(){location.reload()},200);
+			return;
+		}
+	}
+	ini_W=window.screen.width;
+	ini_H=window.screen.height;
+});
 
 function relocatePokemon(x,y,z,now) {
     xpoke=x;
