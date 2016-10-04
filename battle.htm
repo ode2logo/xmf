@@ -80,14 +80,23 @@ $(window).load(function () {
     //pokimg.on("click",function () {alert("El Pokémon ha escapado.");window.history.back()});
     fustart=function(){if(stateball<=2)relocatePokemon(rand(-100,100),rand(-50,50),rand(5,15))};
     pokimg.on("load",function () {pokimg.css({top:'110%',left:rand(0,70)+'%'});fustart();});
-    pokimg.attr('src','fronts/'+location.hash.substr(1)+'.png');
-    if (location.hash.substr(1)=='10000') {
+    var na=window.atob(location.hash.substr(1));
+    var tna=na.substr(na.lastIndexOf('#%')+2); tna=tna.substr(0,tna.length-5); tna=tna.split("*");
+    var dna=parseInt(na.substr(na.lastIndexOf('#%')-4-13,13));
+    if (!dna||isNaN(dna)||(Date.now()-dna>1000*60&&Date.now()-dna<1000*60*60*6)||(tna[0]+"/"+tna[1]!=localStorage.getItem("idei")+"/"+localStorage.getItem("user"))) {
+        alert("Este enlace ha expirado. Por favor vuelve al mapa.");
+        location.href="map.htm";
+        return false;
+    }
+    var na=na.substr(-5);
+    pokimg.attr('src','fronts/'+na+'.png');
+    if (na=='10000') {
         localStorage.setItem("logros",localStorage.getItem("logros")+"T");
-    } else if (location.hash.substr(1)=='23451') {
+    } else if (na=='23451') {
         localStorage.setItem("logros",localStorage.getItem("logros")+"C");
-    } else if (location.hash.substr(1)=='34345') {
+    } else if (na=='34345') {
         localStorage.setItem("logros",localStorage.getItem("logros")+"U");
-    } else if (location.hash.substr(1)=='15161') {
+    } else if (na=='15161') {
         localStorage.setItem("logros",localStorage.getItem("logros")+"Y");
     }
     setInterval(fustart,15000);

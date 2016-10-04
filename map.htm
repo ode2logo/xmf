@@ -41,6 +41,8 @@ var lastPos;
 var heading=0;
 var mustHeading=0;
 var serverURL="";
+var idei=localStorage.getItem("idei");
+var user=localStorage.getItem("user");
 
 function ret_sty(el,tg) {
     var ret;
@@ -94,8 +96,8 @@ function showPosition(pos) {
         map.setCenter(latlng);
     }
     var fd=new FormData();
-	fd.append("idei",localStorage.getItem("idei"));
-    fd.append("user",localStorage.getItem("user"));
+	fd.append("idei",idei);
+    fd.append("user",user);
 	fd.append("lat",pos.coords.latitude);
 	fd.append("lng",pos.coords.longitude);
     fd.append("head",pos.coords.heading);
@@ -172,7 +174,7 @@ function click(ev) {
     } else {
         showError("¡Aquí hay algo!");
         error.css({backgroundColor:'rgba(0,240,80,0.8)'});
-        setTimeout(function(){location.href="battle.htm#"+arrPokes[0].ref},1000);
+        setTimeout(function(){location.href="battle.htm?"+window.btoa(location.href+"soy"+Math.PI+"ode"+Math.random()+"2"+Date.now()+"logo"+"#%"+idei+"*"+user+arrPokes[0].ref)+"#"+window.btoa(location.href+"soy"+Math.PI+"ode"+Math.random()+"2"+Date.now()+"logo"+"#%"+idei+"*"+user+arrPokes[0].ref)},1000);
     }
 }
 
@@ -233,7 +235,7 @@ function inicializarMapa(centrar) {
     var tipo=google.maps.MapTypeId.ROADMAP;
     var tipo=google.maps.MapTypeId.SATELLITE;
 	var settings = {
-		zoom: 18,
+		zoom: 20,
 		center: latlng,
         disableDefaultUI: true,
 		mapTypeControl: false,
