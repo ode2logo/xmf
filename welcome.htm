@@ -6,6 +6,7 @@
 <meta name="keywords" content="Movil Fest 2016 Posadas">
 <meta name="author" content="Emiliano Pujol">
 <script src="jquery.js"></script>
+<script src="buzz.min.js"></script>
 <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
 <link rel="shortcut icon" href="favicon.png">
 <link rel="icon" href="favicon.png">
@@ -52,6 +53,7 @@ var it;
 var sx;
 var pts;
 $(document).ready(function () {
+	playSound("sounds/jungle");
     dw=$("#divwelcome");
     it=$("#txtuser");
     var id=localStorage.getItem("idei")||"";
@@ -76,6 +78,14 @@ $(document).ready(function () {
         dw.css({backgroundColor:"hsl("+h+",50%,50%)"});
     },50);
 });
+function playSound(url) {
+    var sound;
+    $(function() {
+        sound = new buzz.sound( url, {
+            formats: ['ogg', 'mp3']
+        }).setVolume(100).play();
+    });
+}
 function chgUser(el) {
     localStorage.setItem("user",el.value);
 }
@@ -88,13 +98,13 @@ function chgSexo(force,val) {
         $("#sexo_select #sexo_"+val).css({borderSpacing:100}).animate({borderSpacing:0},{
             duration:1000,
             step:function(now,tw) {
-                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)'});
+                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)',webkitFilter:'grayscale('+now+'%)'});
             }
         });
         $("#sexo_select #sexo_"+valo).css({borderSpacing:0}).animate({borderSpacing:100},{
             duration:1000,
             step:function(now,tw) {
-                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)'});
+                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)',webkitFilter:'grayscale('+now+'%)'});
             }
         });
         sx=val;

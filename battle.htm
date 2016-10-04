@@ -48,6 +48,7 @@ var pts=parseInt(localStorage.getItem("puntos"));
 var logros=localStorage.getItem("logros")+'';
 
 $(window).load(function () {
+	playSound("sounds/jungle.mp3");
 //$(document).ready(function () {
     si=setInterval(checkBall,25);
     video=$("#video");
