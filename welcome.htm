@@ -40,12 +40,17 @@ button { margin:5%; font-size:170%; padding: 1vh 3vh; }
 .screenshot { max-width: 100%; width:auto; }
 img.logo_footer {width:100%;max-width: 300px;}
 #txtuser {font-family: "lobster";font-size:1.5em;max-width:100%; text-align:center;padding:0.1em 0em; margin:1em 0 0 0; }
+#sexo_select {font-size: 0px;width:80%;max-width:400px;display:block;text-align:center;}
+#sexo_fix {width:1px;display:inline-block;}
+#sexo_select img {width:45%;}
 </style>
 <script>
 document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
 var h=0;
 var dw;
 var it;
+var sx;
+var pts;
 $(document).ready(function () {
     dw=$("#divwelcome");
     it=$("#txtuser");
@@ -58,6 +63,14 @@ $(document).ready(function () {
     if (!us||us=='undefined'||us=='null')
         us='';
     it.attr('value',us);
+    var sx=localStorage.getItem("sexo")||"";
+    if (!sx||sx=='undefined'||sx=='null')
+        sx='a';
+    chgSexo(true,sx);
+    var pts=parseInt(localStorage.getItem("puntos"));
+    if (!pts||isNaN(pts)||pts=='undefined'||pts=='null')
+        pts=100;
+    localStorage.setItem("puntos",pts);
     setInterval(function(){
         h++;
         dw.css({backgroundColor:"hsl("+h+",50%,50%)"});
@@ -66,6 +79,28 @@ $(document).ready(function () {
 function chgUser(el) {
     localStorage.setItem("user",el.value);
 }
+function chgSexo(force,val) {
+    if (force||sx!=val) {
+        var mh=parseInt($("#sexo_select").css('height'));
+        //alert(mh);
+        $("#sexo_fix").css('height',mh);
+        var valo=val=='a'?'o':'a';
+        $("#sexo_select #sexo_"+val).css({borderSpacing:100}).animate({borderSpacing:0},{
+            duration:1000,
+            step:function(now,tw) {
+                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)'});
+            }
+        });
+        $("#sexo_select #sexo_"+valo).css({borderSpacing:0}).animate({borderSpacing:100},{
+            duration:1000,
+            step:function(now,tw) {
+                $(this).css({width:(20+(100-now)/100*25)+'%',filter:'grayscale('+now+'%)'});
+            }
+        });
+        sx=val;
+    }
+    localStorage.setItem("sexo",val);
+}
 </script>
 </head>
 <body>
@@ -73,8 +108,8 @@ function chgUser(el) {
 <div id='divwelcome'>
     <h3>¡Bienvenido Explorador!</h3>
     <a name='top'></a>
-    <p>Antes de continuar, te sugerimos que utilices <b>Mozilla Firefox</b> y habilites GPS/Servicios de Ubicación.</p>
-    <p>Si no lo tienes, puedes descargarlo aquí:</p>
+    <p>Antes de continuar, es necesario que habilites GPS/Servicios de Ubicación.</p>
+    <p>Opcionalmente, te sugerimos que utilices <b>Mozilla Firefox</b>. Si no lo tienes, puedes descargarlo aquí:</p>
     <center>
     <a href='https://play.google.com/store/apps/details?id=org.mozilla.firefox&hl=es_419'>
         <img src='playstore.png' height='36' alt='Google Play Store'>
@@ -97,8 +132,14 @@ function chgUser(el) {
     <hr>
     <h3>Si ya te ataste los cordones y activaste GPS:</h3>
     ¡Empieza este desafío! No te olvides de participar en los sorteos.
+    <br>
     <center>
         <!--<button onclick="if(navigator.userAgent.indexOf('Firefox')>=0){location.href='map.htm'}else{alert('Por favor, ingresa a través de Mozilla Firefox, de otro modo no lo podrás disfrutar al 101%.');location.href='#top';};">Comenzar!</button>-->
+        <div id='sexo_select'>
+            <img src='chica.png' id='sexo_a' onclick="chgSexo(false,'a');">
+            <div id='sexo_fix'></div>
+            <img src='chico.png' id='sexo_o' onclick="chgSexo(false,'o');">
+        </div>
         <input type='text' id='txtuser' onchange='chgUser(this)' onkeyup='chgUser(this)' placeholder="Ingresa tu nombre" maxlength='24'>
         <button onclick="if(it.attr('value')!=''){location.href='map.htm'}else{alert('Por favor, ingresa tu nombre o apodo.');it.focus();};">Comenzar!</button>
     </center>

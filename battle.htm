@@ -44,6 +44,8 @@ var viwi;
 var vihe;
 var pow=26;
 var powC=2;
+var pts=parseInt(localStorage.getItem("puntos"));
+var logros=localStorage.getItem("logros")+'';
 
 $(window).load(function () {
 //$(document).ready(function () {
@@ -90,14 +92,22 @@ $(window).load(function () {
     }
     var na=na.substr(-5);
     pokimg.attr('src','fronts/'+na+'.png');
-    if (na=='10000') {
-        localStorage.setItem("logros",localStorage.getItem("logros")+"T");
-    } else if (na=='23451') {
-        localStorage.setItem("logros",localStorage.getItem("logros")+"C");
-    } else if (na=='34345') {
-        localStorage.setItem("logros",localStorage.getItem("logros")+"U");
-    } else if (na=='15161') {
-        localStorage.setItem("logros",localStorage.getItem("logros")+"Y");
+    if (logros.indexOf("T")==-1&&na=='10000') {
+        localStorage.setItem("logros",logros+"T");
+        pts+=1000;
+        localStorage.setItem("puntos",pts);
+    } else if (logros.indexOf("C")==-1&&na=='23451') {
+        localStorage.setItem("logros",logros+"C");
+        pts+=1000;
+        localStorage.setItem("puntos",pts);
+    } else if (logros.indexOf("U")==-1&&na=='34345') {
+        localStorage.setItem("logros",logros+"U");
+        pts+=1000;
+        localStorage.setItem("puntos",pts);
+    } else if (logros.indexOf("Y")==-1&&na=='15161') {
+        localStorage.setItem("logros",logros+"Y");
+        pts+=1000;
+        localStorage.setItem("puntos",pts);
     }
     setInterval(fustart,15000);
     document.oncontextmenu=function(ev){ev.preventDefault();ev.stopPropagation();}
@@ -245,7 +255,8 @@ function checkBall() {
                 showError("Buena fotografia!");
                 error.css({backgroundColor:'rgba(0,240,80,0.7)'});
                 stateball=9;
-                /********************************/
+                pts+=10;
+                localStorage.setItem("puntos",pts);
                 takePhoto();
             }
         }

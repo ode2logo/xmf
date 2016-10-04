@@ -43,6 +43,8 @@ var mustHeading=0;
 var serverURL="";
 var idei=localStorage.getItem("idei");
 var user=localStorage.getItem("user");
+var sexo=localStorage.getItem("sexo");
+var pts=parseInt(localStorage.getItem("puntos"));
 
 function ret_sty(el,tg) {
     var ret;
@@ -71,6 +73,7 @@ $(document).ready(function () {
     opcionesInner=$("#opcionesInner");
     info=$("#info");
     showError("Buscando señal GPS...");
+    avatar.css({backgroundImage:"url(chic"+sexo+"_c.png)"});
     if (navigator.geolocation) {
         //if (!navigator.geolocation.watchPosition)
             //navigator.geolocation.getCurrentPosition(showPosition,function(v){showError("No se pudo obtener la ubicación GPS"+v.message)},{enableHighAccuracy:true});
@@ -101,6 +104,7 @@ function showPosition(pos) {
 	fd.append("lat",pos.coords.latitude);
 	fd.append("lng",pos.coords.longitude);
     fd.append("head",pos.coords.heading);
+    fd.append("puntos",pts);
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", serverURL+"main.php?p=00f300&acc=update");
 	xhr.send(fd);
@@ -123,9 +127,9 @@ function loop() {
         radius.css({backgroundSize:'5%'}).animate({backgroundSize:'45%'},3000);
     }
     var r=rand(0,50);
-    if (r<=2) {
+    /*if (r<=2) {
         avatar.css({backgroundImage:"url("+(r==2?"avatar_r.png":"avatar_l.png")+")"});
-    }
+    }*/
     if (map) {
         if (step>10)
             checkPokes();
@@ -138,6 +142,12 @@ function loop() {
         info.html(cum);
     }
     step++;
+    if (step%2==1) {
+        pts=parseInt(localStorage.getItem("puntos"));
+        pts++;
+        console.log(pts);
+        localStorage.setItem("puntos",pts);
+    }
 }
 
 function difAng(a,b) {
@@ -198,7 +208,7 @@ function toggleOpciones() {
                 .animate(stop,600);
         opcionesInner.animate({opacity:1},1000);
         var cum="";
-        cum+="<div class='usuario'>"+localStorage.getItem("user")+"</div>";
+        cum+="<div class='usuario'>"+localStorage.getItem("user")+" <div><b>"+pts+"</b> Puntos</div></div>";
         cum+="<div class='tit'>Logros:</div>";
         var logros=(localStorage.getItem("logros")+'');
         cum+="<table class='logro"+(logros.indexOf('T')>=0?"":" pendiente")+"'><tr><td class='img'><img src='medallas/10000.png'></td><td class='desc'>"+(logros.indexOf('T')>=0?"Este ave no resulta ser muy simpática, pero tenemos que cuidarla porque está en peligro de extinción.":"<b>No tienes este logro</b>.<br>Encuentra un Tucán.")+"</td></tr></table>";
@@ -414,7 +424,7 @@ table.logro .img img { width:50%; }
 table.logro.pendiente .img img {-webkit-filter: grayscale(100%); filter: grayscale(100%);}
 table.logro.pendiente { color:#888; }
 div.usuario {text-align:center;margin:5% 0 3% 0;font-size:3em;font-family:'Baloo Bhai';color:#fff;text-shadow:0 -2px 0px #000;background-color:hsl(100,50%,50%);box-shadow:0 2px 0px #000;}
-
+div.usuario div { font-size: 0.5em;font-family:'Lalezar'; }
 </style>
 </head>
 <body>
